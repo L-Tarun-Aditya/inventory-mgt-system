@@ -1,1 +1,174 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Deliberate operational design system. Neutral-first, no gradients, no glow. */
+:root {
+  --background: #f6f6f4;
+  --foreground: #1b1b19;
+  --surface: #ffffff;
+  --card: #ffffff;
+  --card-foreground: #1b1b19;
+  --popover: #ffffff;
+  --popover-foreground: #1b1b19;
+  --primary: #2f5b9e;
+  --primary-foreground: #ffffff;
+  --secondary: #ececea;
+  --secondary-foreground: #2b2b28;
+  --muted: #eeeeec;
+  --muted-foreground: #6f6e69;
+  --accent: #e8edf5;
+  --accent-foreground: #2f5b9e;
+  --destructive: #b3261e;
+  --destructive-foreground: #ffffff;
+  --success: #1e7e46;
+  --success-foreground: #ffffff;
+  --warning: #9a5b00;
+  --warning-foreground: #ffffff;
+  --border: #e2e1dc;
+  --input: #e2e1dc;
+  --ring: #2f5b9e;
+  --radius-sm: 6px;
+  --radius-md: 7px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius: 8px;
+  --chart-1: #2f5b9e;
+  --chart-2: #5b8299;
+  --chart-3: #8a8a85;
+  --chart-4: #1e7e46;
+  --chart-5: #9a5b00;
+  --sidebar: #efefec;
+  --sidebar-foreground: #1b1b19;
+  --sidebar-border: #e2e1dc;
+  --sidebar-accent: #ffffff;
+}
+
+.dark {
+  --background: #161614;
+  --foreground: #ececea;
+  --surface: #1e1e1c;
+  --card: #1e1e1c;
+  --card-foreground: #ececea;
+  --popover: #232321;
+  --popover-foreground: #ececea;
+  --primary: #7aa3d6;
+  --primary-foreground: #101c30;
+  --secondary: #2a2a27;
+  --secondary-foreground: #ececea;
+  --muted: #262624;
+  --muted-foreground: #a3a29b;
+  --accent: #223146;
+  --accent-foreground: #9dbbe5;
+  --destructive: #e08079;
+  --destructive-foreground: #2a0a08;
+  --success: #6fbf8f;
+  --success-foreground: #0a2315;
+  --warning: #d9a441;
+  --warning-foreground: #2a1c00;
+  --border: #2e2e2b;
+  --input: #2e2e2b;
+  --ring: #7aa3d6;
+  --chart-1: #7aa3d6;
+  --chart-2: #6f9aa8;
+  --chart-3: #8a8a85;
+  --chart-4: #6fbf8f;
+  --chart-5: #d9a441;
+  --sidebar: #1b1b19;
+  --sidebar-foreground: #ececea;
+  --sidebar-border: #2e2e2b;
+  --sidebar-accent: #262624;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --radius-sm: 6px;
+  --radius-md: 7px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    font-size: 14.5px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1 {
+    font-size: 29px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+  }
+  h2 {
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+  }
+}
+
+/* Compact operational tables: 48-56px rows, right-aligned numerics */
+@layer components {
+  .ops-table th {
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted-foreground);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 12px;
+    text-align: left;
+    white-space: nowrap;
+  }
+  .ops-table td {
+    font-size: 13.5px;
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .ops-table tbody tr {
+    height: 52px;
+  }
+  .ops-table tbody tr:hover {
+    background: var(--muted);
+  }
+  .ops-table .numeric {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+}

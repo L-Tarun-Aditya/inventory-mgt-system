@@ -1,34 +1,156 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# E-Commerce Inventory Management System
 
-## Getting Started
+Internal inventory-management dashboard for an e-commerce company. Manage products, stock, suppliers, categories, and inventory movements.
 
-First, run the development server:
+## Why MongoDB?
+
+- **Document model** — products are stored as documents with all their data in one place.
+- **Nested data** — supplier address (`{ street, city, state, zip }`) is embedded in the supplier document.
+- **Flexible product attributes** — a smartphone stores `{ screenSize, ram, storage, battery }` while a shoe stores `{ sizes, material, gender }` in the same `attributes` JSON field. No schema migration needed when a new product type arrives.
+- **Arrays** — `tags`, `images`, and attribute values like `sizes: [7, 8, 9, 10]` are native arrays.
+- **Aggregation** — dashboard KPIs, products-per-category, and inventory-value-per-category are computed with database-side grouping.
+- **Evolving schemas** — new attribute keys can be added per product without touching the Prisma schema.
+
+## Technology Stack
+
+- Next.js 16.x (App Router) · React 19 · TypeScript (strict)
+- Tailwind CSS 4.x · shadcn/ui (customized) · Lucide icons · IBM Plex Sans
+- Prisma ORM 6.19.3 · MongoDB 8.x (Docker) · Zod validation
+- Bun (package manager) · next-themes · Sonner toasts
+
+## Prerequisites
+
+- Bun (current stable)
+- Docker + Docker Compose (for MongoDB)
+
+No local MongoDB install needed — Docker provides it.
+
+## Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repo-url>
+cd inventory_mgt_system
+
+bun install
+
+docker compose up -d
+
+bun run db:push
+bun run db:seed
+
+bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 — the root route is the dashboard (no landing page).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-## Learn More
+Copy the example file:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+cp .env.example .env
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+`.env.example`:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```env
+DATABASE_URL="mongodb://localhost:27017/inventory_management"
+```
 
-## Deploy on Vercel
+Never commit `.env` (already in `.gitignore`).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Database
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Start / stop MongoDB:
+
+```bash
+docker compose up -d
+docker compose down
+```
+
+MongoDB 8.0 runs on `localhost:27017` with a persistent `mongo-data` volume. Prisma ReplicaSet note: the seed script uses operations that require a replica set; the provided single-node container works for `db push`/`db seed` in this project. If Prisma reports `P2031` (transactions require a replica set), start the container with `--replSet` or use `docker compose` as documented and re-run.
+
+## Seeding
+
+```bash
+bun run db:seed
+```
+
+Seeds 7 categories, 6 suppliers, 26 products (each product type has different attributes), and ~39 inventory transactions. The script clears existing data first, so it can be re-run to reset.
+
+## Useful Prisma Commands
+
+```bash
+bun run db:push     # push schema to MongoDB
+bun run db:seed     # seed sample data
+bun run db:studio   # open Prisma Studio
+bunx prisma generate
+```
+
+## Other Scripts
+
+```bash
+bun run dev
+bun run build
+bun run start
+bun run lint
+```
+
+## Features
+
+- Dashboard: KPIs (products, units, low stock, out of stock, value), low-stock table, recent activity, inventory by category
+- Products: full CRUD, search (name/SKU, debounced server-side), filter (category, supplier, stock status, price), sort (name, price, stock, dates), server-side pagination
+- Product detail: two-column info/inventory layout, flexible JSON attributes, edit form, delete with confirmation, adjust-stock dialog, transaction history
+- Stock: current levels + adjust dialog (STOCK_IN / STOCK_OUT / ADJUSTMENT / RETURN), negative inventory blocked, every change writes an `InventoryTransaction`
+- Low stock: `stockQuantity <= reorderLevel` with suggested reorder quantity (`reorderLevel * 2 - stock`, min 0)
+- Categories: CRUD via dialogs, product counts, delete blocked when products reference the category
+- Suppliers: CRUD via dialogs, product counts, delete detaches products
+- Analytics: products by category, value by category, 14-day stock movement, most-stocked products
+- Light/dark mode with persisted theme toggle
+- Loading skeletons, empty states, toasts, confirmations for destructive actions
+
+## MongoDB Concepts Demonstrated
+
+```text
+Documents — products, categories, suppliers, and transactions are documents.
+
+Embedded Data — product attributes live inside the product document;
+supplier address is an embedded object.
+
+Arrays — tags, images, and values such as shoe sizes are arrays.
+
+References — products reference categories (restrict delete) and
+suppliers (set-null on delete); transactions reference products (cascade).
+
+CRUD — products, categories, suppliers, and inventory transactions are
+created, read, updated, and deleted through Prisma.
+
+Aggregation — dashboard stats and analytics group/filter in the database
+(category counts, value sums, movement over time).
+
+Indexes — unique SKU/email plus indexes on name, categoryId, supplierId,
+stockQuantity, productId, createdAt, and transaction type.
+```
+
+## Project Structure
+
+```text
+app/               # routes: dashboard, products, categories, suppliers, stock, low-stock, analytics
+components/ui/     # customized shadcn primitives (7px inputs/buttons, 8px cards/dialogs)
+components/layout/ # sidebar + header + mobile sheet nav
+components/products|catalog/
+lib/               # prisma client, zod validations, server actions, queries, formatting
+prisma/            # schema.prisma + seed.ts
+docker-compose.yml # MongoDB 8.x for local dev
+```
+
+## Demo Walkthrough
+
+1. **Dashboard** — live stats from MongoDB.
+2. **Create** — Products → Add Product, e.g. Sony WH-1000XM6 with attributes `{ "noiseCancellation": true, "batteryLife": "30 hours" }`.
+3. **Read** — search/filter for it on the products page.
+4. **Update** — edit price or attributes on its detail page.
+5. **Stock** — Adjust Stock; see the new row in Inventory History.
+6. **Delete** — delete dialog removes product + its transactions.
+7. **Analytics** — aggregation results per category.
+8. **Explain MongoDB** — compare the headphone document with a shoe document: different attribute keys, same collection, no migrations.

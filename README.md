@@ -28,8 +28,8 @@ No local MongoDB install needed — Docker provides it.
 ## Installation
 
 ```bash
-git clone <repo-url>
-cd inventory_mgt_system
+git clone https://github.com/L-Tarun-Aditya/inventory-mgt-system.git
+cd inventory-mgt-system
 
 bun install
 
@@ -42,6 +42,62 @@ bun run dev
 ```
 
 Open http://localhost:3000 — the root route is the dashboard (no landing page).
+
+## How to Install on Windows
+
+All commands below run in **PowerShell**. Install [Git for Windows](https://git-scm.com/download/win) first if you don't have it.
+
+### 1. Install Bun
+
+```powershell
+irm bun.sh/install.ps1 | iex
+```
+
+Close and reopen PowerShell, then verify:
+
+```powershell
+bun --version
+```
+
+### 2. Install Docker Desktop
+
+1. Download and install [Docker Desktop for Windows](https://www.docker.com/products/docker-desktop/).
+2. During setup, keep **WSL 2** enabled when asked.
+3. Start Docker Desktop and wait until it shows **Engine running** (bottom-left status).
+4. Verify in PowerShell:
+
+```powershell
+docker --version
+docker compose version
+```
+
+### 3. Clone and set up the project
+
+```powershell
+git clone https://github.com/L-Tarun-Aditya/inventory-mgt-system.git
+cd inventory-mgt-system
+
+copy .env.example .env
+
+bun install
+
+docker compose up -d
+
+bun run db:push
+bun run db:seed
+
+bun run dev
+```
+
+Open http://localhost:3000.
+
+### Windows troubleshooting
+
+- **Docker Engine not running** — open Docker Desktop and wait for "Engine running" before `docker compose up -d`.
+- **`docker compose up` fails on port 27017** — another MongoDB is already using the port. Stop it, or change the port mapping in `docker-compose.yml`.
+- **Prisma `P2031` error (replica set required)** — re-run `bun run db:push` and `bun run db:seed`; if it persists, restart the container with `docker compose restart`.
+- **Line-ending warnings from Git** (`LF will be replaced by CRLF`) — harmless, ignore them.
+- **Bun command not found after install** — close and reopen PowerShell so `PATH` updates.
 
 ## Environment Variables
 
